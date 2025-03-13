@@ -3,7 +3,6 @@
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\helpers\StringHelper;
 
 /**
  * @var string $slug
@@ -51,6 +50,15 @@ $this->registerCss(<<<CSS
         display: block;
         font-weight: 400;
         margin: 0;
+    }
+    
+    .table-parsed__text > pre {
+        border: 0;
+        margin: 0;
+        padding: 0;
+        line-height: 21px;
+        background: unset;
+        white-space: pre-wrap;
     }
     
     .table-parsed__row_level_trace td {
@@ -126,12 +134,12 @@ JS
                 $id = 'log-checkbox-' . $model['start'];
 
                 $text = preg_replace('/\n/', ' ', $model['text'], 1);
-                $text = trim(nl2br(htmlspecialchars($text)));
+                $text = trim(htmlspecialchars($text));
 
                 return Html::checkbox(null, false, [
                         'class' => 'table-parsed__checkbox',
                         'id' => $id
-                    ]) . Html::label($text, $id, [
+                    ]) . Html::label(Html::tag('pre', $text), $id, [
                         'class' => 'table-parsed__text'
                     ]);
             }
