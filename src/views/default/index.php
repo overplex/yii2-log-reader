@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = 'Logs';
                     'headerOptions' => ['class' => 'sort-numerical'],
                 ], [
                     'class' => '\yii\grid\ActionColumn',
-                    'template' => '{history} {view} {tail} {archive} {delete} {download}',
+                    'template' => '{history} {view} {tail} {table} {archive} {delete} {download}',
                     'urlCreator' => function ($action, Log $log) {
                         return [$action, 'slug' => $log->slug];
                     },
@@ -64,6 +64,12 @@ $this->params['breadcrumbs'][] = 'Logs';
                         },
                         'tail' => function ($url, Log $log) use ($defaultTailLine) {
                             return !$log->isExist ? '' : Html::a('Tail', $url + ['line' => $defaultTailLine], [
+                                'class' => 'btn btn-xs btn-primary',
+                                'target' => '_blank',
+                            ]);
+                        },
+                        'table' => function ($url, Log $log) {
+                            return !$log->isExist ? '' : Html::a('Table', $url, [
                                 'class' => 'btn btn-xs btn-primary',
                                 'target' => '_blank',
                             ]);

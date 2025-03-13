@@ -48,8 +48,8 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 'prefix' => $this->id,
                 'rules' => [
                     '' => 'default/index',
-                    '<action:\w+>/<slug:[\w-]+>' => 'default/<action>',
-                    '<action:\w+>' => 'default/<action>',
+                    '<action:[\w-]+>/<slug:[\w-]+>' => 'default/<action>',
+                    '<action:[\w-]+>' => 'default/<action>',
                 ],
             ]], false);
         } else {
@@ -113,5 +113,80 @@ class Module extends \yii\base\Module implements BootstrapInterface
         }
 
         return $total;
+    }
+
+    /**
+     * @param string $report
+     * @return array
+     */
+    public function parseLog($report)
+    {
+        $pattern = '/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]/';
+
+        if (!preg_match_all($pattern, $report, $matches, PREG_OFFSET_CAPTURE)) {
+            return [];
+        }
+
+        $result = [];
+        $previousPos = 0;
+
+        foreach ($matches[0] as $index => $match) {
+            $datePos = $match[1];
+
+            if ($index > 0) {
+                $text = substr($report, $previousPos, $datePos - $previousPos);
+                $result[] = [
+                    'text' => $text,
+                    'level' => $this->parseLevel($text),
+                    'start' => $previousPos,
+                    'end' => $datePos
+                ];
+            }
+
+            $previousPos = $datePos;
+        }
+
+        $text = substr($report, $previousPos);
+        $result[] = [
+            'text' => $text,
+            'level' => $this->parseLevel($text),
+            'start' => $previousPos,
+            'end' => null
+        ];
+
+        return $result;
+    }
+
+    /**
+     * @param string $report
+     * @return string
+     */
+    public function parseLevel($report)
+    {
+        if (preg_match('/^[\d\-\: ]+\[.*\]\[.*\]\[.*\]\[(.*)\]/U', $report, $m)) {
+            return $m[1];
+        }
+
+        return 'default';
+    }
+
+    public function deleteSection($content, $start, $end)
+    {
+        return ($end === null)
+            ? substr_replace($content, '', $start)
+            : substr_replace($content, '', $start, $end - $start);
+    }
+
+    public function deleteContaining($content, $text)
+    {
+        $reports = array_reverse($this->parseLog($content));
+
+        foreach ($reports as $report) {
+            if (stripos($report['text'], $text) !== false) {
+                $content = $this->deleteSection($content, $report['start'], $report['end']);
+            }
+        }
+
+        return $content;
     }
 }

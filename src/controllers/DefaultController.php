@@ -4,6 +4,7 @@ namespace kriss\logReader\controllers;
 
 use kriss\logReader\Log;
 use kriss\logReader\models\CleanForm;
+use kriss\logReader\models\ReportSearch;
 use kriss\logReader\models\ZipLogForm;
 use kriss\logReader\Module;
 use Yii;
@@ -50,6 +51,70 @@ class DefaultController extends Controller
                 'mimeType' => 'text/plain',
                 'inline' => true
             ]);
+        } else {
+            throw new NotFoundHttpException('Log not found.');
+        }
+    }
+
+    public function actionTable($slug, $stamp = null)
+    {
+        $this->rememberUrl();
+
+        $log = $this->find($slug, $stamp);
+        if ($log->isExist) {
+            $content = file_get_contents($log->fileName);
+            $models = $this->module->parseLog($content);
+            $searchModel = new ReportSearch();
+            $searchModel->setModels($models);
+            $dataProvider = $searchModel->search(Yii::$app->request->get());
+
+            return $this->render('table', [
+                'name' => $log->name,
+                'slug' => $slug,
+                'stamp' => $stamp,
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
+        } else {
+            throw new NotFoundHttpException('Log not found.');
+        }
+    }
+
+    public function actionDeleteTableItem($slug, $stamp = null, $start, $end = null)
+    {
+        $log = $this->find($slug, $stamp);
+        if ($log->isExist) {
+            $content = file_get_contents($log->fileName);
+            $content = $this->module->deleteSection($content, $start, $end);
+            file_put_contents($log->fileName, $content);
+
+            return $this->redirectPrevious();
+        } else {
+            throw new NotFoundHttpException('Log not found.');
+        }
+    }
+
+    public function actionDeleteTableItemsContaining($slug, $stamp = null, $text)
+    {
+        $log = $this->find($slug, $stamp);
+        if ($log->isExist) {
+            $content = file_get_contents($log->fileName);
+            $content = $this->module->deleteContaining($content, $text);
+            file_put_contents($log->fileName, $content);
+
+            return $this->redirectPrevious();
+        } else {
+            throw new NotFoundHttpException('Log not found.');
+        }
+    }
+
+    public function actionDeleteAllTableItems($slug, $stamp = null)
+    {
+        $log = $this->find($slug, $stamp);
+        if ($log->isExist) {
+            file_put_contents($log->fileName, '');
+
+            return $this->redirectPrevious();
         } else {
             throw new NotFoundHttpException('Log not found.');
         }

@@ -54,7 +54,7 @@ $captionBtnStr = implode(' ', $captionBtn);
                     'headerOptions' => ['class' => 'sort-numerical'],
                 ], [
                     'class' => '\yii\grid\ActionColumn',
-                    'template' => '{view} {tail} {delete} {download}',
+                    'template' => '{view} {tail} {table} {delete} {download}',
                     'urlCreator' => function ($action, Log $log) {
                         return [$action, 'slug' => $log->slug, 'stamp' => $log->stamp];
                     },
@@ -73,6 +73,12 @@ $captionBtnStr = implode(' ', $captionBtn);
                                 return '';
                             }
                             return Html::a('Tail', $url + ['line' => $defaultTailLine], [
+                                'class' => 'btn btn-xs btn-primary',
+                                'target' => '_blank',
+                            ]);
+                        },
+                        'table' => function ($url, Log $log) {
+                            return !$log->isExist ? '' : Html::a('Table', $url, [
                                 'class' => 'btn btn-xs btn-primary',
                                 'target' => '_blank',
                             ]);
