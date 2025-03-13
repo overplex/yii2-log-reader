@@ -140,14 +140,15 @@ class Log extends BaseObject
         }
 
         $counts = [];
+        $l = '(trace|info|warning|error)';
+        $pattern = "/^\]?\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\][\]\[\w-]*\[$l\]/U";
+
         if ($h = fopen($this->getFileName(), 'r')) {
             while (($line = fgets($h)) !== false) {
-                if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $line)) {
-                    if (preg_match('/^[\d\-\: ]+\[.*\]\[.*\]\[.*\]\[(.*)\]/U', $line, $m)) {
-                        $level = $m[1];
-                        if (!isset($counts[$level])) $counts[$level] = 0;
-                        $counts[$level]++;
-                    }
+                if (preg_match($pattern, $line, $m)) {
+                    $level = $m[1];
+                    if (!isset($counts[$level])) $counts[$level] = 0;
+                    $counts[$level]++;
                 }
             }
             fclose($h);

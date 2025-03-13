@@ -53,20 +53,20 @@ $this->registerCss(<<<CSS
         margin: 0;
     }
     
-    .table-parsed__row_level_default td {
+    .table-parsed__row_level_trace td {
         background-color: #fff;
     }
     
-    .table-parsed__row_level_error td {
-        background-color: #ffc8c8;
+    .table-parsed__row_level_info td {
+        background-color: #c9daff;
     }
     
     .table-parsed__row_level_warning td {
         background-color: #fff5b7;
     }
     
-    .table-parsed__row_level_info td {
-        background-color: #c9daff;
+    .table-parsed__row_level_error td {
+        background-color: #ffc8c8;
     }
     
     .table-parsed__checkbox {
@@ -111,14 +111,11 @@ JS
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'rowOptions' => function ($model) {
-
-        if (in_array($model['level'], ['error', 'warning', 'info'])) {
-            $color = $model['level'];
-        } else {
-            $color = 'default';
+        if (in_array($model['level'], ['trace', 'info', 'warning', 'error'])) {
+            return ['class' => 'table-parsed__row_level_' . $model['level']];
         }
 
-        return ['class' => "table-parsed__row_level_$color"];
+        return [];
     },
     'columns' => [
         [

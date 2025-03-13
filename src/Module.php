@@ -121,7 +121,8 @@ class Module extends \yii\base\Module implements BootstrapInterface
      */
     public function parseLog($report)
     {
-        $pattern = '/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]/';
+        $l = '(trace|info|warning|error)';
+        $pattern = "/^(\]?)\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\][\]\[\w-]*\[$l\]/Um";
 
         if (!preg_match_all($pattern, $report, $matches, PREG_OFFSET_CAPTURE)) {
             return [];
@@ -129,27 +130,30 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         $result = [];
         $previousPos = 0;
+        $previousLevel = '';
 
         foreach ($matches[0] as $index => $match) {
-            $datePos = $match[1];
+            $levelPos = $matches[2][$index][0];
+            $datePos = ($matches[1][$index][0] === ']') ? $match[1] + 1 : $match[1];
 
             if ($index > 0) {
                 $text = substr($report, $previousPos, $datePos - $previousPos);
                 $result[] = [
                     'text' => $text,
-                    'level' => $this->parseLevel($text),
+                    'level' => $previousLevel,
                     'start' => $previousPos,
                     'end' => $datePos
                 ];
             }
 
             $previousPos = $datePos;
+            $previousLevel = $levelPos;
         }
 
         $text = substr($report, $previousPos);
         $result[] = [
             'text' => $text,
-            'level' => $this->parseLevel($text),
+            'level' => $previousLevel,
             'start' => $previousPos,
             'end' => null
         ];
@@ -157,24 +161,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
         return $result;
     }
 
-    /**
-     * @param string $report
-     * @return string
-     */
-    public function parseLevel($report)
-    {
-        if (preg_match('/^[\d\-\: ]+\[.*\]\[.*\]\[.*\]\[(.*)\]/U', $report, $m)) {
-            return $m[1];
-        }
-
-        return 'default';
-    }
-
     public function deleteSection($content, $start, $end)
     {
         return ($end === null)
-            ? substr_replace($content, '', $start)
-            : substr_replace($content, '', $start, $end - $start);
+            ? substr_replace($content, PHP_EOL, $start)
+            : substr_replace($content, PHP_EOL, $start, $end - $start);
     }
 
     public function deleteContaining($content, $text)
