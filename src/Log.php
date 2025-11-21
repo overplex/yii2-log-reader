@@ -141,7 +141,7 @@ class Log extends BaseObject
 
         $counts = [];
         $l = '(trace|info|warning|error)';
-        $pattern = "/^\]?\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\][\]\[\w-]*\[$l\]/U";
+        $pattern = "/^\]?\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [\]\[\w\-\.]*\[$l\]/U";
 
         if ($h = fopen($this->getFileName(), 'r')) {
             while (($line = fgets($h)) !== false) {

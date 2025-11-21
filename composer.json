@@ -1,5 +1,5 @@
 {
-    "name": "kriss/yii2-log-reader",
+    "name": "overplex/yii2-log-reader",
     "description": "Yii2 log reader",
     "type": "yii2-extension",
     "keywords": ["yii2","extension","module","log","log reader"],

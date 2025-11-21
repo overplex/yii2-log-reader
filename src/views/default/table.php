@@ -101,7 +101,7 @@ $this->registerJs(<<<JS
     $('#btn-delete-items').on('click', function() {
         const text = $('.report-search-text-cell > input').val().trim();
         if (text.length > 0) {
-            if (confirm('Are you sure you want to delete records containing the text "' + text + '"?')) {
+            if (confirm('Are you sure you want to delete records containing "' + text + '"?')) {
                 window.location.href = deleteTableItemsContainingUrl + '?text=' + encodeURI(text);
             }
         } else if (confirm('Are you sure you want to delete all records?')) {

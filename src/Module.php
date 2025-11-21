@@ -122,7 +122,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     public function parseLog($report)
     {
         $l = '(trace|info|warning|error)';
-        $pattern = "/^(\]?)\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\][\]\[\w-]*\[$l\]/Um";
+        $pattern = "/^(\]?)\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [\]\[\w\-\.]*\[$l\]/Um";
 
         if (!preg_match_all($pattern, $report, $matches, PREG_OFFSET_CAPTURE)) {
             return [];
@@ -168,13 +168,14 @@ class Module extends \yii\base\Module implements BootstrapInterface
             : substr_replace($content, PHP_EOL, $start, $end - $start);
     }
 
-    public function deleteContaining($content, $text)
+    public function deleteContaining($content, $text, &$count = 0)
     {
         $reports = array_reverse($this->parseLog($content));
 
         foreach ($reports as $report) {
             if (stripos($report['text'], $text) !== false) {
                 $content = $this->deleteSection($content, $report['start'], $report['end']);
+                $count++;
             }
         }
 

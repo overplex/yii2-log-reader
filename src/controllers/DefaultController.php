@@ -65,7 +65,7 @@ class DefaultController extends Controller
             $content = file_get_contents($log->fileName);
             $models = $this->module->parseLog($content);
             $searchModel = new ReportSearch();
-            $searchModel->setModels($models);
+            $searchModel->setModels(array_reverse($models));
             $dataProvider = $searchModel->search(Yii::$app->request->get());
 
             return $this->render('table', [
@@ -88,6 +88,8 @@ class DefaultController extends Controller
             $content = $this->module->deleteSection($content, $start, $end);
             file_put_contents($log->fileName, $content);
 
+            Yii::$app->session->setFlash('success', 'Delete table item success');
+
             return $this->redirectPrevious();
         } else {
             throw new NotFoundHttpException('Log not found.');
@@ -98,11 +100,19 @@ class DefaultController extends Controller
     {
         $log = $this->find($slug, $stamp);
         if ($log->isExist) {
+            $count = 0;
+            $text = trim($text);
             $content = file_get_contents($log->fileName);
-            $content = $this->module->deleteContaining($content, $text);
+            $content = $this->module->deleteContaining($content, $text, $count);
             file_put_contents($log->fileName, $content);
 
-            return $this->redirectPrevious();
+            if ($text) {
+                Yii::$app->session->setFlash('success', "Delete table items success ($count)");
+            } else {
+                Yii::$app->session->setFlash('success', "Delete all table items success ($count)");
+            }
+
+            return $this->redirect(['table', 'slug' => $slug]);
         } else {
             throw new NotFoundHttpException('Log not found.');
         }
@@ -114,6 +124,8 @@ class DefaultController extends Controller
         if ($log->isExist) {
             file_put_contents($log->fileName, '');
 
+            Yii::$app->session->setFlash('success', 'Delete all table items success');
+
             return $this->redirectPrevious();
         } else {
             throw new NotFoundHttpException('Log not found.');
@@ -123,7 +135,7 @@ class DefaultController extends Controller
     public function actionArchive($slug)
     {
         if ($this->find($slug, null)->archive(date('YmdHis'))) {
-            Yii::$app->session->setFlash('success', 'archive success');
+            Yii::$app->session->setFlash('success', 'Archive success');
             return $this->redirect(['history', 'slug' => $slug]);
         } else {
             throw new NotFoundHttpException('Log not found.');
@@ -166,10 +178,10 @@ class DefaultController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $result = $model->zip();
             if ($result !== false) {
-                Yii::$app->session->setFlash('success', 'zip success');
+                Yii::$app->session->setFlash('success', 'Zip success');
                 return $this->redirectPrevious();
             } else {
-                Yii::$app->session->setFlash('error', 'zip error: ', implode('<br>', $model->getFirstErrors()));
+                Yii::$app->session->setFlash('error', 'Zip error: ', implode('<br>', $model->getFirstErrors()));
             }
         }
         return $this->render('zip', [
@@ -184,10 +196,10 @@ class DefaultController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $result = $model->clean();
             if ($result !== false) {
-                Yii::$app->session->setFlash('success', 'clean success');
+                Yii::$app->session->setFlash('success', 'Clean success');
                 return $this->redirectPrevious();
             } else {
-                Yii::$app->session->setFlash('error', 'clean error: ', implode('<br>', $model->getFirstErrors()));
+                Yii::$app->session->setFlash('error', 'Clean error: ', implode('<br>', $model->getFirstErrors()));
             }
         }
         return $this->render('clean', [
@@ -200,14 +212,14 @@ class DefaultController extends Controller
         $log = $this->find($slug, $stamp);
         if ($since) {
             if ($log->updatedAt != $since) {
-                Yii::$app->session->setFlash('error', 'delete error: file has updated');
+                Yii::$app->session->setFlash('error', 'Delete error: file has updated');
                 return $this->redirectPrevious();
             }
         }
         if (unlink($log->fileName)) {
-            Yii::$app->session->setFlash('success', 'delete success');
+            Yii::$app->session->setFlash('success', 'Delete success');
         } else {
-            Yii::$app->session->setFlash('error', 'delete error');
+            Yii::$app->session->setFlash('error', 'Delete error');
         }
         return $this->redirectPrevious();
     }

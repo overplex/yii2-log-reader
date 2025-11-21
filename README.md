@@ -11,11 +11,15 @@ Preview
 
 Index
 
-![preview1](https://github.com/krissss/yii2-log-reader/raw/master/screenshots/preview1.jpg)
+![preview1](./screenshots/preview1.jpg)
 
 History
 
-![preview2](https://github.com/krissss/yii2-log-reader/raw/master/screenshots/preview2.jpg)
+![preview2](./screenshots/preview2.jpg)
+
+Table
+
+![preview3](./screenshots/preview3.jpg)
 
 Installation
 ------------
@@ -25,13 +29,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-php composer.phar require --prefer-dist kriss/yii2-log-reader "2.*"
+php composer.phar require --prefer-dist overplex/yii2-log-reader "2.*"
 ```
 
 or add
 
 ```
-"kriss/yii2-log-reader": "2.*"
+"overplex/yii2-log-reader": "2.*"
 ```
 
 to the require section of your `composer.json` file.
