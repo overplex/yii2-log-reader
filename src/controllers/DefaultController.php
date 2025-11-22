@@ -80,7 +80,7 @@ class DefaultController extends Controller
         }
     }
 
-    public function actionDeleteTableItem($slug, $stamp = null, $start, $end = null)
+    public function actionDeleteTableItem($slug, $start, $stamp = null, $end = null)
     {
         $log = $this->find($slug, $stamp);
         if ($log->isExist) {
@@ -96,7 +96,7 @@ class DefaultController extends Controller
         }
     }
 
-    public function actionDeleteTableItemsContaining($slug, $stamp = null, $text)
+    public function actionDeleteTableItemsContaining($slug, $text, $stamp = null)
     {
         $log = $this->find($slug, $stamp);
         if ($log->isExist) {
